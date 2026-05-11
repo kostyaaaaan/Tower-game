@@ -41,8 +41,6 @@
             height: 380px;
             background: #2d5a27;
         }
-
-        /* HUD */
         #hud {
             padding: 10px 14px;
             background: #0f0f1e;
@@ -80,8 +78,6 @@
             transition: all 0.2s;
         }
         .hud-btn:active { background: rgba(255,255,255,0.2); }
-
-        /* Панель действий */
         #action-panel {
             padding: 14px 12px;
             background: #0f0f1e;
@@ -99,7 +95,6 @@
             overflow: hidden;
         }
         button:active { transform: scale(0.94); filter: brightness(1.3); }
-
         .btn-upgrade {
             background: linear-gradient(145deg, #1e1e3a, #161630);
             color: #e2e8f0;
@@ -125,7 +120,6 @@
             border-radius: 20px;
             border: 1px solid rgba(251,191,36,0.3);
         }
-
         .btn-shop {
             background: linear-gradient(135deg, #6d28d9, #4c1d95);
             color: #ede9fe;
@@ -139,7 +133,6 @@
             box-shadow: 0 8px 16px -4px rgba(109,40,217,0.4);
         }
         .btn-shop .label { font-size: 11px; }
-
         .btn-wave {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             color: #000;
@@ -159,8 +152,6 @@
         }
         .btn-wave:disabled { opacity: 0.4; filter: grayscale(0.6); animation: none; box-shadow: none; }
         .btn-wave .label { font-size: 11px; }
-
-        /* Оверлеи */
         #shop-overlay, #friends-overlay, #gameover-overlay {
             position: absolute;
             inset: 0;
@@ -176,7 +167,6 @@
         #shop-overlay.active, #friends-overlay.active, #gameover-overlay.active { display: flex; }
         .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .overlay-header h2 { font-size: 24px; color: #fbbf24; }
-
         .shop-item, .friend-item {
             background: #1e1e32;
             border-radius: 18px;
@@ -190,7 +180,6 @@
         }
         .shop-item button, .friend-item button { background: #7c3aed; color: #fff; padding: 10px 18px; min-height: auto; border-radius: 14px; font-weight: 700; }
         .shop-item button:disabled, .friend-item button:disabled { opacity: 0.4; }
-
         #gameover-overlay { text-align: center; justify-content: center; }
         #gameover-overlay h2 { font-size: 36px; color: #ef4444; margin-bottom: 16px; }
         .btn-restart, .btn-revive {
@@ -201,12 +190,8 @@
             margin-top: 12px;
             font-weight: 800;
         }
-        .btn-revive {
-            background: linear-gradient(135deg, #f472b6, #e11d48);
-            color: white;
-            box-shadow: 0 6px 15px rgba(244,114,182,0.3);
-        }
-        .btn-revive:disabled { opacity: 0.4; filter: grayscale(0.5); }
+        .btn-revive { background: linear-gradient(135deg, #f472b6, #e11d48); color: white; }
+        .btn-revive:disabled { opacity: 0.4; }
         .btn-restart { background: #334155; color: white; }
         #ref-link {
             background: #0f0f1e;
@@ -238,14 +223,10 @@
             <button class="btn-shop" onclick="toggleShop()"><span>🛒</span><span class="label">Магазин</span></button>
             <button class="btn-wave" id="next-wave-btn" onclick="startWave()"><span>⚡</span><span class="label">Волна</span></button>
         </div>
-
-        <!-- Магазин -->
         <div id="shop-overlay">
             <div class="overlay-header"><h2>🛒 Магазин</h2><button onclick="toggleShop()" style="background:rgba(255,255,255,0.1); color:#fff; padding:8px 16px; border-radius:12px;">✕</button></div>
             <div id="shop-items"></div>
         </div>
-
-        <!-- Друзья -->
         <div id="friends-overlay">
             <div class="overlay-header"><h2>👫 Друзья</h2><button onclick="toggleFriends()" style="background:rgba(255,255,255,0.1); color:#fff; padding:8px 16px; border-radius:12px;">✕</button></div>
             <p style="font-size:14px; color:#94a3b8; margin-bottom:8px;">Пригласи друга — получите по 💖💖💖</p>
@@ -253,14 +234,12 @@
             <button onclick="copyRef()" style="background:#fbbf24; color:#000; width:100%; padding:12px; border-radius:14px; font-weight:700; margin-top:8px;">📋 Копировать ссылку</button>
             <p style="font-size:12px; color:#64748b; margin-top:12px;">Друзья появятся здесь позже (Firebase)</p>
         </div>
-
-        <!-- Поражение -->
         <div id="gameover-overlay">
             <h2>💀 Поражение</h2>
             <p>Волна: <span id="lose-wave">1</span></p>
             <p>Убито: <span id="lose-kills">0</span></p>
             <button class="btn-revive" id="btn-revive" onclick="revive()">💖 Возродиться (1 жизнь)</button>
-            <button class="btn-revive" id="btn-revive-ad" onclick="reviveAd()" style="background:#64748b; box-shadow:none;" disabled>📺 Смотреть рекламу (скоро)</button>
+            <button class="btn-revive" id="btn-revive-ad" onclick="reviveAd()" style="background:#64748b;" disabled>📺 Смотреть рекламу (скоро)</button>
             <button class="btn-restart" onclick="restartGame()">🔄 Начать с контрольной точки</button>
         </div>
     </div>
@@ -278,7 +257,7 @@
             fat: loadImage('monster_fat.png')
         };
         IMG.bosses = [
-            loadImage('boss1.png'), loadImage('boss2.png'), loadImage('img/boss3.png'),
+            loadImage('boss1.png'), loadImage('boss2.png'), loadImage('boss3.png'),
             loadImage('boss4.png'), loadImage('boss5.png')
         ];
 
@@ -305,7 +284,6 @@
         var MINI_COST = 1500, MAX_MINI = 5;
         var refLink = '';
 
-        // ============ КЛАССЫ ============
         function Monster(type) {
             this.x = W+30; this.y = ROAD_TOP+Math.random()*(ROAD_BOTTOM-ROAD_TOP-30);
             this.size = 20; this.speed = 0.7+wave*0.08; this.hp = 25+wave*10;
@@ -412,7 +390,6 @@
         Particle.prototype.draw=function(ctx){ ctx.globalAlpha=this.life/0.5;ctx.fillStyle=this.col;ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1; };
         function spawnParticles(x,y,col,n){ for(var i=0;i<n;i++) particles.push(new Particle(x,y,col)); }
 
-        // ============ ЛОГИКА ============
         function shoot(from, forceNormal){
             if (!monsters.length) return;
             var best=null, bestD=Infinity;
@@ -461,14 +438,12 @@
                 btnRevive.disabled = true;
                 btnRevive.textContent = '💖 Нет жизней';
             }
-            // Кнопка рекламы пока неактивна
             btnAd.disabled = true;
             btnAd.textContent = '📺 Смотреть рекламу (скоро)';
         }
         function revive(){
             if (lives <= 0) return;
             lives--;
-            // Убираем всех монстров
             monsters = [];
             gameOver = false;
             document.getElementById('gameover-overlay').classList.remove('active');
@@ -476,7 +451,6 @@
             save();
         }
         function reviveAd(){
-            // Будет добавлено позже
             alert('Реклама появится позже!');
         }
         function restartGame(){
@@ -505,8 +479,6 @@
             if(gold<specials[type].cost||!specials[type].unlocked) return;
             gold-=specials[type].cost; weapon=type; updateUI(); save();
         }
-
-        // Оверлеи
         function toggleShop(){ document.getElementById('shop-overlay').classList.toggle('active'); renderShop(); }
         function toggleFriends(){
             document.getElementById('friends-overlay').classList.toggle('active');
@@ -520,7 +492,6 @@
                 });
             }
         }
-
         function renderShop(){
             var h='';
             h+='<div class="shop-item"><span><b>🔥 Огненный шар</b><br><small>1/волна • АОЕ</small></span><button onclick="buySpecial(\'fire\')" '+(specials.fire.unlocked&&gold>=specials.fire.cost?'':'disabled')+'>'+specials.fire.cost+' 💰</button></div>';
@@ -528,22 +499,19 @@
             h+='<div class="shop-item"><span><b>🏰 Мини-башня</b><br><small>'+miniTowers.length+'/'+MAX_MINI+'</small></span><button onclick="buyMini()" '+(gold>=MINI_COST&&miniTowers.length<MAX_MINI?'':'disabled')+'>'+MINI_COST+' 💰</button></div>';
             document.getElementById('shop-items').innerHTML=h;
         }
-
         function updateUI(){
             document.getElementById('hp-text').textContent=Math.max(0,Math.floor(tower.hp));
             document.getElementById('gold-text').textContent=gold;
             document.getElementById('wave-text').textContent=wave;
             document.getElementById('lives-text').textContent=lives;
-            document.getElementById('weapon-text').textContent=weapon==='normal'?'Обычная':weapon==='fire'?'Огонь':'Лёд';
             document.getElementById('cost-hp').textContent=upgradeCosts.hp+' 💰';
             document.getElementById('cost-dmg').textContent=upgradeCosts.damage+' 💰';
             document.getElementById('cost-spd').textContent=upgradeCosts.speed+' 💰';
             updateReviveButtons();
         }
 
-        // ============ СОХРАНЕНИЕ ============
         function save(){
-            localStorage.setItem('td_v5', JSON.stringify({
+            localStorage.setItem('td_v6', JSON.stringify({
                 gold:gold, wave:wave, checkpoint:checkpoint,
                 towerHp:tower.hp, towerMaxHp:tower.maxHp, towerDamage:tower.damage,
                 attackSpeed:tower.attackSpeed, upgradeCosts:upgradeCosts,
@@ -552,36 +520,45 @@
             }));
         }
         function load(){
-            var raw=localStorage.getItem('td_v5');
-            if(raw){
-                try{
-                    var d=JSON.parse(raw);
-                    gold=d.gold||250; wave=d.wave||1; checkpoint=d.checkpoint||1;
-                    tower.hp=d.towerHp||120; tower.maxHp=d.towerMaxHp||120;
-                    tower.damage=d.towerDamage||12; tower.attackSpeed=d.attackSpeed||1.2;
-                    Object.assign(upgradeCosts, d.upgradeCosts||{});
-                    if(d.specials) Object.assign(specials, d.specials);
-                    weapon=d.weapon||'normal';
-                    lives=d.lives||3;
-                    totalKills=d.totalKills||0;
-                    if(d.miniTowers){
-                        miniTowers=[];
+            var raw = localStorage.getItem('td_v6');
+            if (!raw) raw = localStorage.getItem('td_v5');
+            if (!raw) raw = localStorage.getItem('td_v4');
+            if (raw) {
+                try {
+                    var d = JSON.parse(raw);
+                    gold = d.gold || 250;
+                    wave = d.wave || 1;
+                    checkpoint = d.checkpoint || 1;
+                    tower.hp = d.towerHp || 120;
+                    tower.maxHp = d.towerMaxHp || 120;
+                    tower.damage = d.towerDamage || 12;
+                    tower.attackSpeed = d.attackSpeed || 1.2;
+                    if (d.upgradeCosts) Object.assign(upgradeCosts, d.upgradeCosts);
+                    if (d.specials) Object.assign(specials, d.specials);
+                    weapon = d.weapon || 'normal';
+                    lives = d.lives || 3;
+                    totalKills = d.totalKills || 0;
+                    if (d.miniTowers) {
+                        miniTowers = [];
                         d.miniTowers.forEach(function(t,i){
-                            if(i<MAX_MINI){
-                                var yOff=(i-2)*28;
-                                miniTowers.push({ x:tower.x+65, y:tower.y+10+yOff, w:28, h:35, hp:t.hp||45, maxHp:45, damage:tower.damage*0.65, attackSpeed:0.75, lastShot:0 });
+                            if (i < MAX_MINI) {
+                                var yOff = (i - 2) * 28;
+                                miniTowers.push({
+                                    x: tower.x + 65, y: tower.y + 10 + yOff,
+                                    w: 28, h: 35, hp: t.hp || 45, maxHp: 45,
+                                    damage: tower.damage * 0.65, attackSpeed: 0.75, lastShot: 0
+                                });
                             }
                         });
                     }
-                }catch(e){}
+                } catch(e) {}
             }
-            // Формируем реферальную ссылку
             var userId = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) ? window.Telegram.WebApp.initDataUnsafe.user.id : 'test';
             refLink = 'https://t.me/your_bot?start=' + userId;
-            updateUI(); renderShop();
+            updateUI();
+            renderShop();
         }
 
-        // ============ РЕФЕРАЛЬНАЯ СИСТЕМА ============
         function processReferral(){
             var urlParams = new URLSearchParams(window.location.search);
             var refId = urlParams.get('start');
@@ -590,19 +567,16 @@
                 if (userId && refId !== String(userId)) {
                     var usedRefs = JSON.parse(localStorage.getItem('td_refs_used') || '[]');
                     if (usedRefs.indexOf(refId) === -1) {
-                        // Новый реферал! Даём жизни обоим
                         lives += 3;
                         save();
                         usedRefs.push(refId);
                         localStorage.setItem('td_refs_used', JSON.stringify(usedRefs));
-                        // TODO: Начислить жизни рефереру через сервер
                         alert('Вы перешли по реферальной ссылке! +3 💖');
                     }
                 }
             }
         }
 
-        // ============ ИГРОВОЙ ЦИКЛ ============
         function loop(now){
             requestAnimationFrame(loop);
             var dt=Math.min((now-(loop.last||now))/1000, 0.12);
@@ -650,10 +624,9 @@
             particles.forEach(function(p){ p.draw(ctx); });
         }
 
-        // ============ СТАРТ ============
         load();
         processReferral();
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
