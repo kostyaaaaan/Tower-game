@@ -6,7 +6,6 @@
     <title>Защита Башни</title>
     <style>
         :root {
-            --bg: #1a1a2e;
             --gold: #fbbf24;
             --red: #ef4444;
             --text: #f1f5f9;
@@ -22,40 +21,43 @@
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             -webkit-user-select: none;
-            padding: 12px;
+            padding: 8px;
         }
         #game-wrapper {
             width: 100%;
             max-width: 420px;
-            aspect-ratio: 3/5;
-            max-height: 720px;
+            height: auto;
             display: flex;
             flex-direction: column;
-            background: var(--bg);
+            background: #1a1a2e;
             border-radius: 24px;
             overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
-            position: relative;
         }
-        canvas { display: block; flex: 1; width: 100%; }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 380px;
+            background: #2d5a27;
+        }
         #hud {
-            padding: 14px 16px;
+            padding: 12px 14px;
             background: #0f0f1e;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             flex-wrap: wrap;
             border-bottom: 1px solid #2d2d45;
         }
         .hud-item {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             background: rgba(255,255,255,0.06);
-            padding: 8px 14px;
-            border-radius: 30px;
-            font-size: 13px;
+            padding: 7px 12px;
+            border-radius: 25px;
+            font-size: 12px;
             font-weight: 700;
             color: var(--text);
         }
@@ -63,19 +65,19 @@
         .hud-gold { color: #fbbf24; }
         .hud-wave { color: #3b82f6; }
         #action-panel {
-            padding: 12px;
+            padding: 10px;
             background: #0f0f1e;
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 8px;
             border-top: 1px solid #2d2d45;
         }
         button {
             border: none;
-            border-radius: 18px;
-            padding: 12px 14px;
+            border-radius: 16px;
+            padding: 10px 8px;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -84,29 +86,24 @@
             background: #1e1e32;
             color: #e2e8f0;
             border: 1px solid #334155;
-            flex: 1;
-            min-width: 0;
-            min-height: 50px;
+            min-height: 48px;
             transition: all 0.15s;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
         }
         button:active { transform: scale(0.94); filter: brightness(1.3); }
         .price-tag {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
             color: #fbbf24;
             background: rgba(0,0,0,0.3);
-            padding: 2px 10px;
-            border-radius: 20px;
+            padding: 2px 8px;
+            border-radius: 15px;
         }
-        .btn-shop { background: #4c1d95; color: #ede9fe; flex: 0 0 auto; font-size: 20px; padding: 12px 16px; }
+        .btn-shop { background: #4c1d95; color: #ede9fe; font-size: 18px; }
         .btn-wave {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             color: #000;
-            flex: 0 0 auto;
-            font-size: 16px;
-            padding: 12px 20px;
-            min-width: 90px;
+            font-size: 14px;
             box-shadow: 0 6px 15px rgba(245,158,11,0.4);
         }
         .btn-wave:disabled { opacity: 0.4; filter: grayscale(0.6); }
@@ -179,6 +176,7 @@
             <button onclick="upgrade('speed')">⏱️ Скорость<div class="price-tag" id="cost-spd">130 💰</div></button>
             <button class="btn-shop" onclick="toggleShop()">🛒</button>
             <button class="btn-wave" id="next-wave-btn" onclick="startWave()">⚡ Волна</button>
+            <button class="btn-restart" onclick="restartGame()" style="background:#ef4444;color:#fff;font-size:12px;">🔄</button>
         </div>
         <div id="shop-overlay">
             <div class="shop-header"><h2>🛒 Магазин</h2><button onclick="toggleShop()" style="background:rgba(255,255,255,0.1);">✕</button></div>
@@ -193,7 +191,7 @@
         </div>
     </div>
     <script>
-        // ============ КАРТИНКИ (ТВОИ НАЗВАНИЯ) ============
+        // ============ КАРТИНКИ ============
         var IMG = {};
         function loadImage(src) { var img = new Image(); img.src = src; return img; }
         IMG.tower = loadImage('tower.png');
@@ -216,11 +214,13 @@
         // ============ ИГРА ============
         var canvas = document.getElementById('gameCanvas');
         var ctx = canvas.getContext('2d');
-        var W = 420, H = 600;
-        canvas.width = W; canvas.height = H;
-        var ROAD_TOP = 200, ROAD_BOTTOM = 410, ROAD_CENTER = (ROAD_TOP+ROAD_BOTTOM)/2;
+        var W = 420, H = 380;
+        canvas.width = W;
+        canvas.height = H;
 
-        var tower = { x:65, y:ROAD_CENTER-60, w:60, h:120, hp:120, maxHp:120, damage:12, attackSpeed:1.2, lastShot:0 };
+        var ROAD_TOP = 100, ROAD_BOTTOM = 300, ROAD_CENTER = (ROAD_TOP+ROAD_BOTTOM)/2;
+
+        var tower = { x:50, y:ROAD_CENTER-50, w:55, h:100, hp:120, maxHp:120, damage:12, attackSpeed:1.2, lastShot:0 };
         var miniTowers = [];
         var monsters = [];
         var bullets = [];
@@ -234,37 +234,50 @@
         };
         var MINI_COST = 1500, MAX_MINI = 5;
 
-        // Классы
         function Monster(type) {
-            this.x = W+40; this.y = ROAD_TOP+Math.random()*(ROAD_BOTTOM-ROAD_TOP-40);
-            this.size = 22; this.speed = 0.7+wave*0.08; this.hp = 25+wave*10;
-            this.damage = 6+wave*1.5; this.attackCD = 0; this.type = type||'normal';
-            this.anim = Math.random()*100; this.sx = 1; this.sy = 1; this.frozen = false;
-            if (type==='fast') { this.speed*=1.7; this.size=18; this.hp*=0.7; }
+            this.x = W+30;
+            this.y = ROAD_TOP+Math.random()*(ROAD_BOTTOM-ROAD_TOP-30);
+            this.size = 20;
+            this.speed = 0.7+wave*0.08;
+            this.hp = 25+wave*10;
+            this.damage = 6+wave*1.5;
+            this.attackCD = 0;
+            this.type = type||'normal';
+            this.anim = Math.random()*100;
+            this.sx = 1;
+            this.sy = 1;
+            this.frozen = false;
+            if (type==='fast') { this.speed*=1.7; this.size=16; this.hp*=0.7; }
             if (type==='strong') { this.speed*=0.7; this.hp*=1.8; this.damage*=1.5; }
-            if (type==='fat') { this.speed*=0.5; this.size=28; this.hp*=2.8; }
+            if (type==='fat') { this.speed*=0.5; this.size=26; this.hp*=2.8; }
             if (type==='boss') {
-                this.size=38; this.hp=350+wave*50; this.damage=20+wave*4; this.speed=0.35;
-                this.y=ROAD_CENTER; this.bossIndex = Math.min(Math.floor((wave-10)/10), 4);
+                this.size=34;
+                this.hp=350+wave*50;
+                this.damage=20+wave*4;
+                this.speed=0.35;
+                this.y=ROAD_CENTER;
+                this.bossIndex = Math.min(Math.floor((wave-10)/10), 4);
             }
             this.maxHp = this.hp;
         }
         Monster.prototype.update = function(dt) {
             this.anim += dt*8;
             var spd = this.speed * (this.frozen ? specials.ice.slow : 1);
-            if (this.x > tower.x+tower.w+30) {
-                this.sx = 1.15; this.sy = 0.85;
-                this.x -= spd*55*dt;
+            if (this.x > tower.x+tower.w+20) {
+                this.sx = 1.12;
+                this.sy = 0.88;
+                this.x -= spd*50*dt;
                 if (Math.abs(this.y-ROAD_CENTER)>5) this.y += (ROAD_CENTER-this.y)*0.3*dt;
             } else {
                 this.attackCD -= dt;
                 if (this.attackCD <= 0) {
-                    this.sx = 1.35; this.sy = 0.65;
+                    this.sx = 1.3;
+                    this.sy = 0.7;
                     var tgt = tower;
                     if (miniTowers.length && Math.random()<0.4) tgt = miniTowers[Math.floor(Math.random()*miniTowers.length)];
                     tgt.hp -= this.damage;
                     this.attackCD = 1.1;
-                    spawnParticles(tgt.x+tgt.w/2, tgt.y+tgt.h/2, '#ff4444', 4);
+                    spawnParticles(tgt.x+tgt.w/2, tgt.y+tgt.h/2, '#ff4444', 3);
                     if (tgt===tower && tower.hp<=0) endGame();
                     var self = this;
                     setTimeout(function(){ self.sx=1; self.sy=1; }, 150);
@@ -292,23 +305,23 @@
             ctx.restore();
             if (this.hp < this.maxHp) {
                 ctx.fillStyle = '#1f2937';
-                ctx.fillRect(this.x-16, this.y-this.size-12, 32, 5);
+                ctx.fillRect(this.x-14, this.y-this.size-10, 28, 4);
                 ctx.fillStyle = '#10b981';
-                ctx.fillRect(this.x-16, this.y-this.size-12, 32*(this.hp/this.maxHp), 5);
+                ctx.fillRect(this.x-14, this.y-this.size-10, 28*(this.hp/this.maxHp), 4);
             }
         };
 
         function Bullet(x, y, target, dmg, type) {
-            this.x=x; this.y=y; this.target=target; this.speed=300; this.dmg=dmg; this.type=type||'normal';
-            this.size=type==='fire'?6:type==='ice'?5:3; this.life=3.5; this.trail=[];
+            this.x=x; this.y=y; this.target=target; this.speed=280; this.dmg=dmg; this.type=type||'normal';
+            this.size=type==='fire'?5:type==='ice'?4:3; this.life=3; this.trail=[];
         }
         Bullet.prototype.update = function(dt) {
             this.life-=dt; if (this.life<=0) return true;
             if (!this.target||this.target.hp<=0) return true;
             var dx=this.target.x-this.x, dy=this.target.y-this.y, dist=Math.hypot(dx,dy);
-            if (dist<12) { this.hit(); return true; }
-            this.trail.push({x:this.x,y:this.y,life:0.15});
-            if (this.trail.length>8) this.trail.shift();
+            if (dist<10) { this.hit(); return true; }
+            this.trail.push({x:this.x,y:this.y,life:0.12});
+            if (this.trail.length>6) this.trail.shift();
             this.x+=(dx/dist)*this.speed*dt; this.y+=(dy/dist)*this.speed*dt;
             this.trail.forEach(function(t){ t.life-=dt; });
             this.trail=this.trail.filter(function(t){ return t.life>0; });
@@ -316,7 +329,7 @@
         };
         Bullet.prototype.hit = function() {
             this.target.hp-=this.dmg;
-            spawnParticles(this.target.x,this.target.y,'#fbbf24',6);
+            spawnParticles(this.target.x,this.target.y,'#fbbf24',5);
             if (this.type==='fire') {
                 var self = this;
                 monsters.forEach(function(m){
@@ -333,17 +346,17 @@
         };
         Bullet.prototype.draw = function(ctx) {
             this.trail.forEach(function(t){
-                ctx.globalAlpha=t.life/0.15*0.5;
-                ctx.fillStyle='#fbbf24'; ctx.beginPath(); ctx.arc(t.x,t.y,3,0,Math.PI*2); ctx.fill();
+                ctx.globalAlpha=t.life/0.12*0.4;
+                ctx.fillStyle='#fbbf24'; ctx.beginPath(); ctx.arc(t.x,t.y,2.5,0,Math.PI*2); ctx.fill();
             });
             ctx.globalAlpha=1;
             ctx.fillStyle=this.type==='fire'?'#f97316':this.type==='ice'?'#60a5fa':'#fbbf24';
             ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();
         };
 
-        function Particle(x,y,col){ this.x=x;this.y=y;this.vx=(Math.random()-0.5)*140;this.vy=(Math.random()-0.5)*140;this.life=0.55;this.col=col; }
+        function Particle(x,y,col){ this.x=x;this.y=y;this.vx=(Math.random()-0.5)*120;this.vy=(Math.random()-0.5)*120;this.life=0.5;this.col=col; }
         Particle.prototype.update=function(dt){ this.x+=this.vx*dt;this.y+=this.vy*dt;this.life-=dt;return this.life>0; };
-        Particle.prototype.draw=function(ctx){ ctx.globalAlpha=this.life/0.55;ctx.fillStyle=this.col;ctx.beginPath();ctx.arc(this.x,this.y,2.5,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1; };
+        Particle.prototype.draw=function(ctx){ ctx.globalAlpha=this.life/0.5;ctx.fillStyle=this.col;ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1; };
         function spawnParticles(x,y,col,n){ for(var i=0;i<n;i++) particles.push(new Particle(x,y,col)); }
 
         function shoot(from, forceNormal){
@@ -372,7 +385,7 @@
 
         function startWave(){ if(active||gameOver) return; active=true; toSpawn=4+wave*2; spawned=0; spawnTimer=0; specialUsed=false; document.getElementById('next-wave-btn').disabled=true; }
         function endWave(){
-            active=false; wave++; gold+=Math.floor(22+wave*9);
+            active=false; wave++; gold+=Math.floor(20+wave*8);
             if (wave%10===0){ specials.fire.unlocked=true; specials.ice.unlocked=true; checkpoint=wave; }
             document.getElementById('next-wave-btn').disabled=false; updateUI(); save();
         }
@@ -393,16 +406,16 @@
             if(gameOver) return;
             var cost=upgradeCosts[type]; if(gold<cost) return;
             gold-=cost;
-            if(type==='hp'){ tower.maxHp+=60; tower.hp=Math.min(tower.hp+60,tower.maxHp); }
-            if(type==='damage') tower.damage+=7;
-            if(type==='speed') tower.attackSpeed+=0.25;
-            upgradeCosts[type]=Math.floor(cost*1.55); updateUI(); save();
+            if(type==='hp'){ tower.maxHp+=55; tower.hp=Math.min(tower.hp+55,tower.maxHp); }
+            if(type==='damage') tower.damage+=6;
+            if(type==='speed') tower.attackSpeed+=0.22;
+            upgradeCosts[type]=Math.floor(cost*1.5); updateUI(); save();
         }
         function buyMini(){
             if(gold<MINI_COST||miniTowers.length>=MAX_MINI) return;
             gold-=MINI_COST;
-            var yOff=(miniTowers.length-2)*32;
-            miniTowers.push({ x:tower.x+70, y:tower.y+15+yOff, w:30, h:40, hp:50, maxHp:50, damage:tower.damage*0.7, attackSpeed:0.8, lastShot:0 });
+            var yOff=(miniTowers.length-2)*28;
+            miniTowers.push({ x:tower.x+65, y:tower.y+10+yOff, w:28, h:35, hp:45, maxHp:45, damage:tower.damage*0.65, attackSpeed:0.75, lastShot:0 });
             updateUI(); save();
         }
         function buySpecial(type){
@@ -414,7 +427,7 @@
             var h='';
             h+='<div class="shop-item"><span><b>🔥 Огненный шар</b><br><small>1/волна • АОЕ</small></span><button onclick="buySpecial(\'fire\')" '+(specials.fire.unlocked&&gold>=specials.fire.cost?'':'disabled')+'>'+specials.fire.cost+' 💰</button></div>';
             h+='<div class="shop-item"><span><b>❄️ Ледяная сфера</b><br><small>1/волна • Замедление</small></span><button onclick="buySpecial(\'ice\')" '+(specials.ice.unlocked&&gold>=specials.ice.cost?'':'disabled')+'>'+specials.ice.cost+' 💰</button></div>';
-            h+='<div class="shop-item"><span><b>🏰 Мини-башня</b><br><small>'+miniTowers.length+'/'+MAX_MINI+' • Авто-атака</small></span><button onclick="buyMini()" '+(gold>=MINI_COST&&miniTowers.length<MAX_MINI?'':'disabled')+'>'+MINI_COST+' 💰</button></div>';
+            h+='<div class="shop-item"><span><b>🏰 Мини-башня</b><br><small>'+miniTowers.length+'/'+MAX_MINI+'</small></span><button onclick="buyMini()" '+(gold>=MINI_COST&&miniTowers.length<MAX_MINI?'':'disabled')+'>'+MINI_COST+' 💰</button></div>';
             document.getElementById('shop-items').innerHTML=h;
         }
         function updateUI(){
@@ -427,10 +440,10 @@
             document.getElementById('cost-spd').textContent=upgradeCosts.speed+' 💰';
         }
         function save(){
-            localStorage.setItem('td_img2', JSON.stringify({gold:gold,wave:wave,checkpoint:checkpoint,towerHp:tower.hp,towerMaxHp:tower.maxHp,towerDamage:tower.damage,attackSpeed:tower.attackSpeed,upgradeCosts:upgradeCosts,specials:specials,weapon:weapon,miniTowers:miniTowers}));
+            localStorage.setItem('td_v4', JSON.stringify({gold:gold,wave:wave,checkpoint:checkpoint,towerHp:tower.hp,towerMaxHp:tower.maxHp,towerDamage:tower.damage,attackSpeed:tower.attackSpeed,upgradeCosts:upgradeCosts,specials:specials,weapon:weapon,miniTowers:miniTowers}));
         }
         function load(){
-            var raw=localStorage.getItem('td_img2');
+            var raw=localStorage.getItem('td_v4');
             if(raw){
                 try{
                     var d=JSON.parse(raw);
@@ -440,15 +453,7 @@
                     Object.assign(upgradeCosts, d.upgradeCosts||{});
                     if(d.specials) Object.assign(specials, d.specials);
                     weapon=d.weapon||'normal';
-                    if(d.miniTowers){
-                        miniTowers=[];
-                        d.miniTowers.forEach(function(t,i){
-                            if(i<MAX_MINI){
-                                var yOff=(i-2)*32;
-                                miniTowers.push({ x:tower.x+70, y:tower.y+15+yOff, w:30, h:40, hp:t.hp||50, maxHp:50, damage:tower.damage*0.7, attackSpeed:0.8, lastShot:0 });
-                            }
-                        });
-                    }
+                    if(d.miniTowers){ miniTowers=[]; d.miniTowers.forEach(function(t,i){ if(i<MAX_MINI){ var yOff=(i-2)*28; miniTowers.push({ x:tower.x+65, y:tower.y+10+yOff, w:28, h:35, hp:t.hp||45, maxHp:45, damage:tower.damage*0.65, attackSpeed:0.75, lastShot:0 }); } }); }
                 }catch(e){}
             }
             updateUI(); renderShop();
@@ -459,7 +464,7 @@
             var dt=Math.min((now-(loop.last||now))/1000, 0.12);
             loop.last=now;
             if(gameOver){ draw(); return; }
-            if(active&&spawned<toSpawn){ spawnTimer+=dt; if(spawnTimer>1.7){ spawnTimer=0; spawnMonster(); } }
+            if(active&&spawned<toSpawn){ spawnTimer+=dt; if(spawnTimer>1.6){ spawnTimer=0; spawnMonster(); } }
             var sec=now/1000;
             if(sec-tower.lastShot>1/tower.attackSpeed&&monsters.length) shoot(tower);
             miniTowers.forEach(function(mt){ if(sec-mt.lastShot>1/mt.attackSpeed&&monsters.length) shoot(mt,true); });
@@ -467,8 +472,8 @@
             for(var i=monsters.length-1;i>=0;i--){
                 monsters[i].update(dt);
                 if(monsters[i].hp<=0){
-                    gold+=monsters[i].type==='boss'?250:monsters[i].type==='fat'?35:monsters[i].type==='strong'?25:20;
-                    totalKills++; spawnParticles(monsters[i].x,monsters[i].y,'#fbbf24',12);
+                    gold+=monsters[i].type==='boss'?220:monsters[i].type==='fat'?32:monsters[i].type==='strong'?22:18;
+                    totalKills++; spawnParticles(monsters[i].x,monsters[i].y,'#fbbf24',10);
                     monsters.splice(i,1);
                 }
             }
@@ -484,17 +489,17 @@
                 ctx.fillStyle='#2d5a27'; ctx.fillRect(0,0,W,H);
             }
             if (IMG.tower&&IMG.tower.complete) {
-                ctx.drawImage(IMG.tower, tower.x-5, tower.y-25, tower.w+10, tower.h+30);
+                ctx.drawImage(IMG.tower, tower.x-5, tower.y-20, tower.w+10, tower.h+25);
             } else {
                 ctx.fillStyle='#6b8e6b'; ctx.fillRect(tower.x, tower.y, tower.w, tower.h);
-                ctx.fillStyle='#fbbf24'; ctx.fillRect(tower.x+12, tower.y+20, 8, 8); ctx.fillRect(tower.x+32, tower.y+20, 8, 8);
+                ctx.fillStyle='#fbbf24'; ctx.fillRect(tower.x+10, tower.y+15, 8, 8); ctx.fillRect(tower.x+28, tower.y+15, 8, 8);
             }
-            var hpW=tower.w, hpH=8, hpX=tower.x, hpY=tower.y-22;
+            var hpW=tower.w, hpH=7, hpX=tower.x, hpY=tower.y-15;
             ctx.fillStyle='#1f2937'; ctx.fillRect(hpX,hpY,hpW,hpH);
             ctx.fillStyle='#ef4444'; ctx.fillRect(hpX,hpY,hpW*Math.max(0,tower.hp/tower.maxHp),hpH);
             miniTowers.forEach(function(mt){
                 ctx.fillStyle='#6b8c6b'; ctx.fillRect(mt.x,mt.y,mt.w,mt.h);
-                ctx.fillStyle='#fbbf24'; ctx.fillRect(mt.x+5,mt.y+5,5,5); ctx.fillRect(mt.x+16,mt.y+5,5,5);
+                ctx.fillStyle='#fbbf24'; ctx.fillRect(mt.x+4,mt.y+4,4,4); ctx.fillRect(mt.x+14,mt.y+4,4,4);
             });
             monsters.forEach(function(m){ m.draw(ctx); });
             bullets.forEach(function(b){ b.draw(ctx); });
