@@ -2,693 +2,637 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Защита башни</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Защита Башни</title>
     <style>
+        :root {
+            --bg: #1e1e2f;
+            --panel: #151522;
+            --gold: #fbbf24;
+            --red: #ef4444;
+            --green: #10b981;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #2d2d45;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            background: #1a1a2e;
+            background: #0f0f1a;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: none;
+            overscroll-behavior: none;
+            padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
         }
-        #game-container {
-            position: relative;
-            width: 400px;
-            height: 700px;
-            background: #2d5a27;
-            border: 3px solid #5c3d2e;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-        /* Верхняя панель */
-        #hud {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 50px;
-            background: rgba(0,0,0,0.8);
+
+        #game-wrapper {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 800px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 15px;
-            color: white;
-            font-size: 16px;
-            z-index: 10;
-            border-bottom: 2px solid #ffd700;
+            flex-direction: column;
+            background: var(--bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            position: relative;
         }
-        .gold {
-            color: #ffd700;
-            font-weight: bold;
-        }
-        /* Холст игры */
+
         canvas {
             display: block;
+            flex: 1;
             width: 100%;
-            height: 100%;
+            background: #2d5a27;
         }
-        /* Нижняя панель */
+
+        /* HUD */
+        #hud {
+            padding: 12px 16px;
+            background: var(--panel);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 15px;
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255,255,255,0.05);
+            padding: 6px 10px;
+            border-radius: 20px;
+        }
+
+        .hud-gold { color: var(--gold); }
+        .hud-hp { color: var(--red); }
+        .hud-wave { color: var(--blue); }
+
+        /* Панель действий */
         #action-panel {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 100px;
-            background: rgba(0,0,0,0.9);
+            padding: 10px 12px;
+            background: var(--panel);
             display: flex;
             flex-wrap: wrap;
-            padding: 8px;
-            gap: 6px;
+            gap: 8px;
+            border-top: 1px solid var(--border);
             z-index: 10;
-            border-top: 2px solid #ffd700;
         }
+
         button {
-            padding: 8px 12px;
             border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 14px;
+            border-radius: 14px;
+            padding: 10px 14px;
+            font-weight: 700;
+            font-size: 13px;
             cursor: pointer;
-            transition: all 0.2s;
-            flex: 1 1 auto;
-            min-width: 70px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
         }
+
         button:active {
-            transform: scale(0.95);
+            transform: scale(0.94);
+            filter: brightness(1.2);
         }
+
         .btn-upgrade {
-            background: #3a6b35;
-            color: white;
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            flex: 1;
+            min-width: 0;
         }
-        .btn-special {
-            background: #8b4513;
-            color: white;
-        }
-        .btn-wave {
-            background: #ffd700;
-            color: #000;
-            font-size: 16px;
-        }
+
         .btn-shop {
-            background: #6a0dad;
-            color: white;
+            background: #4c1d95;
+            color: #ede9fe;
+            flex: 0 0 auto;
         }
-        .btn:disabled {
+
+        .btn-wave {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #000;
+            flex: 0 0 auto;
+            font-size: 15px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+        }
+
+        .btn-wave:disabled {
             opacity: 0.4;
             pointer-events: none;
+            filter: grayscale(0.5);
         }
-        /* Экран поражения */
-        #game-over-screen {
+
+        /* Магазин */
+        #shop-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        #shop-overlay.active {
+            display: flex;
+        }
+
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .shop-header h2 {
+            font-size: 20px;
+            color: var(--gold);
+        }
+
+        .shop-item {
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+
+        .shop-item button {
+            background: var(--purple);
+            color: white;
+        }
+
+        /* Экран поражения */
+        #gameover-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(8px);
+            z-index: 25;
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 20;
-        }
-        #game-over-screen h2 {
-            color: #ff4444;
-            font-size: 32px;
-            margin-bottom: 15px;
-        }
-        #game-over-screen p {
             color: white;
-            font-size: 18px;
-            margin-bottom: 20px;
+            text-align: center;
+            padding: 30px;
         }
-        .restart-btn {
-            padding: 15px 40px;
-            background: #ffd700;
+
+        #gameover-overlay.active {
+            display: flex;
+        }
+
+        #gameover-overlay h2 {
+            font-size: 36px;
+            color: var(--red);
+            margin-bottom: 12px;
+        }
+
+        .btn-restart {
+            margin-top: 20px;
+            background: var(--gold);
             color: #000;
-            font-size: 20px;
-            border: none;
-            border-radius: 12px;
-            font-weight: bold;
+            padding: 14px 32px;
+            font-size: 18px;
+            border-radius: 20px;
         }
-        /* Магазин */
-        #shop-panel {
-            position: absolute;
-            bottom: 100px;
-            left: 0;
-            right: 0;
-            background: rgba(30,30,50,0.95);
-            padding: 15px;
-            display: none;
-            z-index: 15;
-            border-top: 2px solid #ffd700;
+
+        /* Анимации */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        #shop-panel h3 {
-            color: #ffd700;
-            margin-bottom: 10px;
+
+        .shop-item, #gameover-overlay > * {
+            animation: fadeInUp 0.3s ease;
+        }
+
+        /* Текст цен на кнопках */
+        .price-tag {
+            font-size: 10px;
+            opacity: 0.85;
+            display: block;
+            margin-top: 2px;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
+    <div id="game-wrapper">
         <div id="hud">
-            <span>❤️ <span id="hp-text">100</span></span>
-            <span>💰 <span class="gold" id="gold-text">200</span></span>
-            <span>🌊 <span id="wave-text">1</span></span>
+            <div class="hud-item hud-hp">❤️ <span id="hp-text">100</span></div>
+            <div class="hud-item hud-gold">💰 <span id="gold-text">200</span></div>
+            <div class="hud-item hud-wave">🌊 <span id="wave-text">1</span></div>
+            <div class="hud-item">🗡️ <span id="weapon-text">Обычная</span></div>
         </div>
         <canvas id="gameCanvas"></canvas>
         <div id="action-panel">
-            <button class="btn-upgrade" onclick="upgrade('hp')">❤️ Стены</button>
-            <button class="btn-upgrade" onclick="upgrade('damage')">⚔️ Урон</button>
-            <button class="btn-upgrade" onclick="upgrade('speed')">⏱️ Скорость</button>
-            <button class="btn-shop" onclick="toggleShop()">🛒 Магазин</button>
-            <button class="btn-wave" id="next-wave-btn" onclick="startWave()">⚡ Волна!</button>
+            <button class="btn-upgrade" onclick="upgrade('hp')">❤️ Стены<div class="price-tag" id="cost-hp">80 💰</div></button>
+            <button class="btn-upgrade" onclick="upgrade('damage')">⚔️ Урон<div class="price-tag" id="cost-dmg">100 💰</div></button>
+            <button class="btn-upgrade" onclick="upgrade('speed')">⏱️ Скорость<div class="price-tag" id="cost-spd">90 💰</div></button>
+            <button class="btn-shop" onclick="toggleShop()">🛒</button>
+            <button class="btn-wave" id="next-wave-btn" onclick="startWave()">⚡ Волна</button>
         </div>
-        <div id="shop-panel">
-            <h3>🛒 Магазин оружия</h3>
+        <div id="shop-overlay">
+            <div class="shop-header">
+                <h2>🛒 Магазин</h2>
+                <button onclick="toggleShop()" style="background: transparent; color: white; font-size: 18px;">✕</button>
+            </div>
             <div id="shop-items"></div>
         </div>
-        <div id="game-over-screen">
-            <h2>💀 Поражение!</h2>
+        <div id="gameover-overlay">
+            <h2>💀 Поражение</h2>
             <p>Волна: <span id="lose-wave">1</span></p>
             <p>Убито: <span id="lose-kills">0</span></p>
-            <button class="restart-btn" onclick="restartGame()">🔄 Начать заново</button>
+            <p style="color: #94a3b8; font-size: 14px;">Прогресс сохранён на контрольной точке</p>
+            <button class="btn-restart" onclick="restartGame()">🔄 Продолжить</button>
         </div>
     </div>
+
     <script>
-        // ==================== ОСНОВНЫЕ ПЕРЕМЕННЫЕ ====================
+        // ==================== КОНФИГУРАЦИЯ ====================
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const W = 400, H = 700;
+        const W = 420, H = 600;
         canvas.width = W;
         canvas.height = H;
 
-        // Дорога (по центру, горизонтальная линия)
-        const ROAD_Y_START = 180;
-        const ROAD_Y_END = 520;
-        const ROAD_X = W/2;
+        const ROAD_TOP = 200, ROAD_BOTTOM = 410, ROAD_CENTER_Y = (ROAD_TOP + ROAD_BOTTOM) / 2;
 
-        // Игровые объекты
-        let tower = {
-            x: 80, y: 350,
-            hp: 100, maxHp: 100,
-            damage: 15,
-            attackSpeed: 1.5, // выстрелов в секунду
-            lastShotTime: 0,
-            level: 1
-        };
-
+        // Башня
+        let tower = { x: 80, y: ROAD_CENTER_Y - 60, w: 50, h: 100, hp: 120, maxHp: 120, damage: 12, attackSpeed: 1.2, lastShot: 0 };
+        let miniTowers = []; // { x, y, damage, attackSpeed, lastShot }
         let monsters = [];
         let bullets = [];
         let particles = [];
-        let gold = 200;
+        let gold = 250;
         let wave = 1;
-        let monstersInWave = 4;
-        let monstersSpawned = 0;
-        let waveActive = false;
+        let active = false;
+        let spawned = 0;
+        let toSpawn = 0;
+        let spawnTimer = 0;
         let gameOver = false;
         let totalKills = 0;
-        let lastCheckpoint = 1; // каждые 10 волн
-
-        // Улучшения
-        let upgradeCosts = { hp: 80, damage: 100, speed: 90 };
-        let specialWeapons = {
-            fire: { unlocked: false, cost: 500, damage: 30, aoe: 60, name: "Огненный шар" },
-            ice: { unlocked: false, cost: 800, damage: 10, slow: 0.5, aoe: 50, name: "Ледяная сфера" }
-        };
+        let checkpoint = 1;
+        let specialUsedThisWave = false;
         let selectedWeapon = 'normal';
+
+        const upgradeCosts = { hp: 120, damage: 150, speed: 130 };
+        const specials = {
+            fire: { name: 'Огненный шар', cost: 2200, damage: 55, aoe: 70, desc: 'Урон по области', unlocked: false },
+            ice: { name: 'Ледяная сфера', cost: 2800, damage: 18, slow: 0.4, aoe: 60, desc: 'Замедляет врагов', unlocked: false }
+        };
+        const miniTowerCost = 1500;
+        const MAX_MINI_TOWERS = 5;
 
         // ==================== КЛАССЫ ====================
         class Monster {
             constructor(type) {
-                this.x = W + 20;
-                this.y = ROAD_Y_START + Math.random() * (ROAD_Y_END - ROAD_Y_START - 40);
-                this.size = 20;
-                this.speed = 0.6 + Math.random() * 0.4;
-                this.hp = 20 + wave * 8;
-                this.maxHp = this.hp;
-                this.damage = 5 + wave * 2;
-                this.attackCooldown = 0;
+                this.x = W + 30;
+                this.y = ROAD_TOP + Math.random() * (ROAD_BOTTOM - ROAD_TOP - 30);
+                this.size = 18;
+                this.speed = 0.7 + wave * 0.08;
+                this.hp = 25 + wave * 10;
+                this.damage = 6 + wave * 1.5;
+                this.attackCD = 0;
                 this.type = type || 'normal';
-                this.frame = 0; // для анимации
-                // Особые свойства
-                if (type === 'fast') {
-                    this.speed *= 1.8;
-                    this.size = 16;
-                    this.hp *= 0.7;
-                } else if (type === 'tank') {
-                    this.size = 28;
-                    this.hp *= 2.5;
-                    this.speed *= 0.6;
+                if (type === 'fast') { this.speed *= 1.7; this.size = 14; this.hp *= 0.7; }
+                if (type === 'tank') { this.speed *= 0.5; this.size = 26; this.hp *= 2.8; }
+                if (type === 'boss') {
+                    this.size = 36; this.hp = 350 + wave * 50; this.damage = 20 + wave * 4; this.speed = 0.35;
+                    this.y = ROAD_CENTER_Y;
                 }
                 this.maxHp = this.hp;
+                this.frozen = false;
             }
+
             update(dt) {
-                if (this.x > ROAD_X + 40) {
-                    // Идёт к дороге
-                    this.x -= this.speed * 60 * dt;
-                    this.frame += dt * 4;
-                } else if (this.x > tower.x + 60) {
-                    // Идёт вдоль дороги к башне
-                    this.x -= this.speed * 60 * dt;
-                    // Плавно смещается к центру дороги
-                    const targetY = ROAD_Y_START + (ROAD_Y_END - ROAD_Y_START)/2;
-                    if (Math.abs(this.y - targetY) > 5) {
-                        this.y += (targetY - this.y) * 0.5 * dt;
-                    }
-                    this.frame += dt * 4;
+                let spd = this.speed * (this.frozen ? specials.ice.slow : 1);
+                if (this.x > tower.x + tower.w + 20) {
+                    this.x -= spd * 55 * dt;
+                    if (Math.abs(this.y - ROAD_CENTER_Y) > 5) this.y += (ROAD_CENTER_Y - this.y) * 0.3 * dt;
                 } else {
-                    // Атакует башню
-                    this.attackCooldown -= dt;
-                    if (this.attackCooldown <= 0) {
-                        tower.hp -= this.damage;
-                        this.attackCooldown = 1.2;
-                        spawnHitParticles(tower.x + 30, tower.y + 50);
+                    this.attackCD -= dt;
+                    if (this.attackCD <= 0) {
+                        let target = tower;
+                        if (miniTowers.length > 0) target = miniTowers[Math.floor(Math.random() * miniTowers.length)];
+                        target.hp -= this.damage;
+                        this.attackCD = 1.1;
+                        spawnParticles(target.x + target.w/2, target.y + target.h/2, '#ff4444', 3);
+                        if (target === tower && tower.hp <= 0) endGame();
                     }
                 }
             }
+
             draw(ctx) {
                 ctx.save();
-                // Тень
-                ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.shadowBlur = 6;
-                // Тело (разные цвета по типу)
-                if (this.type === 'fast') ctx.fillStyle = '#ff6b6b';
-                else if (this.type === 'tank') ctx.fillStyle = '#8b0000';
-                else if (this.type === 'boss') ctx.fillStyle = '#ff00ff';
-                else ctx.fillStyle = '#c23152';
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = 'rgba(0,0,0,0.4)';
+                let col = this.type === 'fast' ? '#f87171' : this.type === 'tank' ? '#b91c1c' : this.type === 'boss' ? '#e879f9' : '#ef4444';
+                if (this.frozen) col = '#93c5fd';
+                ctx.fillStyle = col;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
                 ctx.fill();
                 // Глаза
                 ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(this.x - 6, this.y - 4, 5, 0, Math.PI * 2);
-                ctx.arc(this.x + 6, this.y - 4, 5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = 'black';
-                ctx.beginPath();
-                ctx.arc(this.x - 6, this.y - 4, 2.5, 0, Math.PI * 2);
-                ctx.arc(this.x + 6, this.y - 4, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                // Полоска HP
+                ctx.beginPath(); ctx.arc(this.x-5, this.y-3, 4, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(this.x+5, this.y-3, 4, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#111';
+                ctx.beginPath(); ctx.arc(this.x-5, this.y-3, 2, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(this.x+5, this.y-3, 2, 0, Math.PI*2); ctx.fill();
                 if (this.hp < this.maxHp) {
-                    const barW = 30;
-                    const barH = 4;
-                    const barX = this.x - barW/2;
-                    const barY = this.y - this.size - 8;
-                    ctx.fillStyle = '#333';
-                    ctx.fillRect(barX, barY, barW, barH);
-                    ctx.fillStyle = '#e94560';
-                    ctx.fillRect(barX, barY, barW * (this.hp / this.maxHp), barH);
+                    ctx.fillStyle = '#1f2937';
+                    ctx.fillRect(this.x-15, this.y-this.size-10, 30, 5);
+                    ctx.fillStyle = '#10b981';
+                    ctx.fillRect(this.x-15, this.y-this.size-10, 30*(this.hp/this.maxHp), 5);
                 }
                 ctx.restore();
             }
         }
 
         class Bullet {
-            constructor(x, y, target, damage, type = 'normal') {
-                this.x = x;
-                this.y = y;
-                this.target = target;
-                this.speed = 250;
-                this.damage = damage;
-                this.type = type;
-                this.size = type === 'fire' ? 6 : type === 'ice' ? 5 : 3;
+            constructor(x, y, target, dmg, type) {
+                this.x = x; this.y = y; this.target = target;
+                this.speed = 280; this.dmg = dmg; this.type = type || 'normal';
+                this.size = type === 'fire' ? 5 : type === 'ice' ? 4 : 3;
+                this.lifetime = 3.0; // исчезнет через 3 сек
             }
             update(dt) {
-                if (!this.target || this.target.hp <= 0) return false;
-                const dx = this.target.x - this.x;
-                const dy = this.target.y - this.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 8) {
-                    this.onHit();
-                    return true; // попал
-                }
-                this.x += (dx / dist) * this.speed * dt;
-                this.y += (dy / dist) * this.speed * dt;
+                this.lifetime -= dt;
+                if (this.lifetime <= 0) return true;
+                if (!this.target || this.target.hp <= 0) return true;
+                let dx = this.target.x - this.x;
+                let dy = this.target.y - this.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist < 10) { this.hit(); return true; }
+                this.x += (dx/dist) * this.speed * dt;
+                this.y += (dy/dist) * this.speed * dt;
                 return false;
             }
-            onHit() {
-                this.target.hp -= this.damage;
-                spawnHitParticles(this.target.x, this.target.y);
-                // Особые эффекты
+            hit() {
+                this.target.hp -= this.dmg;
+                spawnParticles(this.target.x, this.target.y, '#fbbf24', 5);
                 if (this.type === 'fire') {
-                    // Урон по области
                     monsters.forEach(m => {
-                        const dist = Math.hypot(m.x - this.target.x, m.y - this.target.y);
-                        if (dist < specialWeapons.fire.aoe && m !== this.target) {
-                            m.hp -= specialWeapons.fire.damage * 0.5;
-                        }
+                        if (m !== this.target && Math.hypot(m.x-this.target.x, m.y-this.target.y) < specials.fire.aoe)
+                            m.hp -= specials.fire.damage * 0.6;
                     });
-                } else if (this.type === 'ice') {
-                    // Замедление
-                    this.target.speed *= specialWeapons.ice.slow;
-                    setTimeout(() => { if (this.target) this.target.speed /= specialWeapons.ice.slow; }, 1500);
+                }
+                if (this.type === 'ice') {
+                    monsters.forEach(m => {
+                        if (Math.hypot(m.x-this.target.x, m.y-this.target.y) < specials.ice.aoe) m.frozen = true;
+                    });
                 }
             }
             draw(ctx) {
-                ctx.fillStyle = this.type === 'fire' ? '#ff6600' : this.type === 'ice' ? '#66ccff' : '#ffd700';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = this.type === 'fire' ? '#f97316' : this.type === 'ice' ? '#60a5fa' : '#fbbf24';
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
             }
         }
 
         class Particle {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.vx = (Math.random() - 0.5) * 100;
-                this.vy = (Math.random() - 0.5) * 100;
-                this.life = 0.6;
-                this.maxLife = 0.6;
-            }
-            update(dt) {
-                this.x += this.vx * dt;
-                this.y += this.vy * dt;
-                this.life -= dt;
-                return this.life > 0;
-            }
-            draw(ctx) {
-                const alpha = this.life / this.maxLife;
-                ctx.fillStyle = `rgba(255,200,0,${alpha})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            constructor(x, y, col) { this.x = x; this.y = y; this.vx = (Math.random()-0.5)*120; this.vy = (Math.random()-0.5)*120; this.life = 0.5; this.col = col; }
+            update(dt) { this.x += this.vx*dt; this.y += this.vy*dt; this.life -= dt; return this.life > 0; }
+            draw(ctx) { ctx.globalAlpha = this.life/0.5; ctx.fillStyle = this.col; ctx.beginPath(); ctx.arc(this.x, this.y, 3, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1; }
         }
 
-        // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
-        function spawnHitParticles(x, y) {
-            for (let i = 0; i < 5; i++) {
-                particles.push(new Particle(x, y));
-            }
-        }
+        function spawnParticles(x, y, col, n) { for (let i=0; i<n; i++) particles.push(new Particle(x,y,col)); }
 
-        function shoot() {
+        // ==================== ЛОГИКА ====================
+        function shoot(from) {
             if (monsters.length === 0) return;
-            // Находим ближайшего монстра
-            let closest = null;
-            let minDist = Infinity;
-            monsters.forEach(m => {
-                const dist = Math.hypot(m.x - tower.x, m.y - (tower.y + 50));
-                if (dist < minDist && m.x > tower.x) {
-                    minDist = dist;
-                    closest = m;
-                }
-            });
-            if (!closest) return;
-            const dmg = selectedWeapon === 'fire' ? specialWeapons.fire.damage :
-                       selectedWeapon === 'ice' ? specialWeapons.ice.damage : tower.damage;
-            bullets.push(new Bullet(tower.x + 40, tower.y + 50, closest, dmg, selectedWeapon));
-            tower.lastShotTime = performance.now() / 1000;
+            let best = null, bestDist = Infinity;
+            monsters.forEach(m => { let d = m.x - from.x; if (d > 0 && d < bestDist) { bestDist = d; best = m; } });
+            if (!best) return;
+            let dmg = from.damage || tower.damage;
+            if (from === tower && selectedWeapon !== 'normal' && !specialUsedThisWave) {
+                bullets.push(new Bullet(from.x+from.w, from.y+from.h/2, best, specials[selectedWeapon].damage, selectedWeapon));
+                specialUsedThisWave = true;
+            } else {
+                bullets.push(new Bullet(from.x+from.w, from.y+from.h/2, best, dmg, 'normal'));
+            }
+            from.lastShot = performance.now()/1000;
         }
 
         function spawnMonster() {
             let type = 'normal';
-            if (wave >= 10 && wave % 10 === 0 && monstersSpawned === 0) {
-                type = 'boss'; // Босс!
-            } else if (wave >= 5) {
-                const r = Math.random();
-                if (r < 0.3) type = 'fast';
-                else if (r < 0.5) type = 'tank';
-            }
-            const monster = new Monster(type);
-            if (type === 'boss') {
-                monster.size = 40;
-                monster.hp = 200 + wave * 30;
-                monster.maxHp = monster.hp;
-                monster.damage = 15 + wave * 3;
-                monster.speed = 0.3;
-                monster.y = ROAD_Y_START + (ROAD_Y_END - ROAD_Y_START)/2;
-            }
-            monsters.push(monster);
-            monstersSpawned++;
+            if (wave >= 10 && wave%10===0 && spawned===0) type = 'boss';
+            else if (wave >= 5 && Math.random() < 0.35) type = Math.random() < 0.5 ? 'fast' : 'tank';
+            monsters.push(new Monster(type));
+            spawned++;
         }
 
         function startWave() {
-            if (waveActive || gameOver) return;
-            waveActive = true;
-            monstersInWave = 4 + wave * 2;
-            monstersSpawned = 0;
+            if (active || gameOver) return;
+            active = true;
+            toSpawn = 4 + wave * 2;
+            spawned = 0;
+            spawnTimer = 0;
+            specialUsedThisWave = false;
             document.getElementById('next-wave-btn').disabled = true;
         }
 
         function endWave() {
-            waveActive = false;
+            active = false;
             wave++;
-            gold += 30 + wave * 10;
+            gold += Math.floor(20 + wave * 8);
+            if (wave%10===0) { specials.fire.unlocked = true; specials.ice.unlocked = true; checkpoint = wave; }
             document.getElementById('next-wave-btn').disabled = false;
-            updateHUD();
-            saveGame();
-            // Разблокировка оружия
-            if (wave % 10 === 0 && wave > 0) {
-                if (!specialWeapons.fire.unlocked) specialWeapons.fire.unlocked = true;
-                else if (!specialWeapons.ice.unlocked) specialWeapons.ice.unlocked = true;
-                renderShop();
-            }
-            // Контрольная точка
-            if (wave % 10 === 0) {
-                lastCheckpoint = wave;
-            }
+            updateUI();
+            save();
+        }
+
+        function endGame() {
+            gameOver = true;
+            document.getElementById('lose-wave').textContent = wave;
+            document.getElementById('lose-kills').textContent = totalKills;
+            document.getElementById('gameover-overlay').classList.add('active');
+            save();
         }
 
         function restartGame() {
             tower.hp = tower.maxHp;
-            gold = Math.floor(gold * 0.7); // Штраф 30%
-            wave = lastCheckpoint;
-            monsters = [];
-            bullets = [];
-            waveActive = false;
-            gameOver = false;
-            document.getElementById('game-over-screen').style.display = 'none';
+            gold = Math.floor(gold * 0.6);
+            wave = checkpoint;
+            monsters = []; bullets = []; active = false; gameOver = false;
+            document.getElementById('gameover-overlay').classList.remove('active');
             document.getElementById('next-wave-btn').disabled = false;
-            updateHUD();
-            saveGame();
+            updateUI();
+            save();
         }
 
         function upgrade(type) {
             if (gameOver) return;
-            const cost = upgradeCosts[type];
-            if (gold < cost) return alert('Недостаточно золота!');
+            let cost = upgradeCosts[type];
+            if (gold < cost) return;
             gold -= cost;
-            if (type === 'hp') {
-                tower.maxHp += 50;
-                tower.hp = Math.min(tower.hp + 50, tower.maxHp);
-            } else if (type === 'damage') {
-                tower.damage += 5;
-            } else if (type === 'speed') {
-                tower.attackSpeed += 0.3;
-            }
-            upgradeCosts[type] = Math.floor(cost * 1.5);
-            updateHUD();
-            saveGame();
+            if (type === 'hp') { tower.maxHp += 55; tower.hp = Math.min(tower.hp+55, tower.maxHp); }
+            if (type === 'damage') tower.damage += 6;
+            if (type === 'speed') tower.attackSpeed += 0.25;
+            upgradeCosts[type] = Math.floor(cost * 1.6);
+            updateUI();
+            save();
         }
 
-        function buyWeapon(weapon) {
-            const w = specialWeapons[weapon];
-            if (!w.unlocked) return alert('Ещё не открыто!');
-            if (gold < w.cost) return alert('Недостаточно золота!');
-            gold -= w.cost;
-            selectedWeapon = weapon;
-            updateHUD();
-            saveGame();
+        function buyMiniTower() {
+            if (gold < miniTowerCost || miniTowers.length >= MAX_MINI_TOWERS) return;
+            gold -= miniTowerCost;
+            let yOff = (miniTowers.length - 2) * 30;
+            miniTowers.push({ x: tower.x + 60, y: tower.y + 20 + yOff, w: 25, h: 35, hp: 40, maxHp: 40, damage: tower.damage*0.7, attackSpeed: 0.8, lastShot: 0 });
+            updateUI();
+            save();
+        }
+
+        function buySpecial(type) {
+            if (gold < specials[type].cost || !specials[type].unlocked) return;
+            gold -= specials[type].cost;
+            selectedWeapon = type;
+            updateUI();
+            save();
         }
 
         function toggleShop() {
-            const panel = document.getElementById('shop-panel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function renderShop() {
-            const container = document.getElementById('shop-items');
-            let html = '';
-            for (let key in specialWeapons) {
-                const w = specialWeapons[key];
-                html += `<div style="margin:8px 0;display:flex;justify-content:space-between;align-items:center;">
-                    <span>${w.name} ${w.unlocked ? '✅' : '🔒'}</span>
-                    <button onclick="buyWeapon('${key}')" ${!w.unlocked || gold < w.cost ? 'disabled' : ''} style="background:#8b4513;color:white;padding:6px 12px;border:none;border-radius:6px;">${w.cost} 💰</button>
-                </div>`;
-            }
-            container.innerHTML = html || '<p style="color:gray;">Нет оружия</p>';
-        }
-
-        function updateHUD() {
-            document.getElementById('hp-text').textContent = Math.max(0, tower.hp);
-            document.getElementById('gold-text').textContent = gold;
-            document.getElementById('wave-text').textContent = wave;
-        }
-
-        // ==================== СОХРАНЕНИЕ ====================
-        function saveGame() {
-            const data = { gold, wave, lastCheckpoint, towerHp: tower.hp, towerMaxHp: tower.maxHp, towerDamage: tower.damage, attackSpeed: tower.attackSpeed, upgradeCosts, specialWeapons, selectedWeapon };
-            localStorage.setItem('td_save', JSON.stringify(data));
-        }
-
-        function loadGame() {
-            const raw = localStorage.getItem('td_save');
-            if (raw) {
-                try {
-                    const data = JSON.parse(raw);
-                    gold = data.gold || 200;
-                    wave = data.wave || 1;
-                    lastCheckpoint = data.lastCheckpoint || 1;
-                    tower.hp = data.towerHp || 100;
-                    tower.maxHp = data.towerMaxHp || 100;
-                    tower.damage = data.towerDamage || 15;
-                    tower.attackSpeed = data.attackSpeed || 1.5;
-                    upgradeCosts = data.upgradeCosts || { hp: 80, damage: 100, speed: 90 };
-                    if (data.specialWeapons) Object.assign(specialWeapons, data.specialWeapons);
-                    selectedWeapon = data.selectedWeapon || 'normal';
-                } catch(e) {}
-            }
-            updateHUD();
+            document.getElementById('shop-overlay').classList.toggle('active');
             renderShop();
         }
 
-        // ==================== ИГРОВОЙ ЦИКЛ ====================
-        function gameLoop(now) {
-            requestAnimationFrame(gameLoop);
-            const dt = Math.min((now - (gameLoop.lastTime || now)) / 1000, 0.1);
-            gameLoop.lastTime = now;
+        function renderShop() {
+            let html = '';
+            html += `<div class="shop-item"><span>🔥 Огненный шар (1/волна, АОЕ)</span><button onclick="buySpecial('fire')" ${!specials.fire.unlocked||gold<specials.fire.cost?'disabled':''}>${specials.fire.cost} 💰</button></div>`;
+            html += `<div class="shop-item"><span>❄️ Ледяная сфера (1/волна, slow)</span><button onclick="buySpecial('ice')" ${!specials.ice.unlocked||gold<specials.ice.cost?'disabled':''}>${specials.ice.cost} 💰</button></div>`;
+            html += `<div class="shop-item"><span>🏰 Мини-башня (${miniTowers.length}/${MAX_MINI_TOWERS})</span><button onclick="buyMiniTower()" ${gold<miniTowerCost||miniTowers.length>=MAX_MINI_TOWERS?'disabled':''}>${miniTowerCost} 💰</button></div>`;
+            document.getElementById('shop-items').innerHTML = html;
+        }
 
-            if (gameOver) return;
+        function updateUI() {
+            document.getElementById('hp-text').textContent = Math.max(0, Math.floor(tower.hp));
+            document.getElementById('gold-text').textContent = gold;
+            document.getElementById('wave-text').textContent = wave;
+            document.getElementById('weapon-text').textContent = selectedWeapon === 'normal' ? 'Обычная' : selectedWeapon === 'fire' ? 'Огонь' : 'Лёд';
+            document.getElementById('cost-hp').textContent = upgradeCosts.hp + ' 💰';
+            document.getElementById('cost-dmg').textContent = upgradeCosts.damage + ' 💰';
+            document.getElementById('cost-spd').textContent = upgradeCosts.speed + ' 💰';
+        }
 
-            // Спавн монстров
-            if (waveActive && monstersSpawned < monstersInWave) {
-                if (!gameLoop.spawnTimer) gameLoop.spawnTimer = 0;
-                gameLoop.spawnTimer += dt;
-                if (gameLoop.spawnTimer > 1.5) {
-                    gameLoop.spawnTimer = 0;
-                    spawnMonster();
-                }
+        function save() {
+            localStorage.setItem('td_v2', JSON.stringify({ gold, wave, checkpoint, towerHp: tower.hp, towerMaxHp: tower.maxHp, towerDamage: tower.damage, attackSpeed: tower.attackSpeed, upgradeCosts, specials, selectedWeapon, miniTowers: miniTowers.map(t=>({hp:t.hp})) }));
+        }
+        function load() {
+            let raw = localStorage.getItem('td_v2');
+            if (raw) {
+                try {
+                    let d = JSON.parse(raw);
+                    gold = d.gold||250; wave = d.wave||1; checkpoint = d.checkpoint||1;
+                    tower.hp = d.towerHp||120; tower.maxHp = d.towerMaxHp||120; tower.damage = d.towerDamage||12;
+                    tower.attackSpeed = d.attackSpeed||1.2;
+                    Object.assign(upgradeCosts, d.upgradeCosts||{});
+                    if (d.specials) Object.assign(specials, d.specials);
+                    selectedWeapon = d.selectedWeapon||'normal';
+                    if (d.miniTowers) d.miniTowers.forEach((t,i) => { if (i<MAX_MINI_TOWERS && miniTowers[i]) miniTowers[i].hp = t.hp; });
+                } catch(e){}
+            }
+            updateUI();
+            renderShop();
+        }
+
+        // ==================== ГЛАВНЫЙ ЦИКЛ ====================
+        function loop(now) {
+            requestAnimationFrame(loop);
+            let dt = Math.min((now - (loop.last||now))/1000, 0.1);
+            loop.last = now;
+            if (gameOver) { draw(); return; }
+
+            if (active && spawned < toSpawn) {
+                spawnTimer += dt;
+                if (spawnTimer > 1.6) { spawnTimer = 0; spawnMonster(); }
             }
 
-            // Стрельба
-            const nowSec = now / 1000;
-            if (nowSec - tower.lastShotTime > 1 / tower.attackSpeed && monsters.length > 0) {
-                shoot();
-            }
+            let sec = now/1000;
+            if (sec - tower.lastShot > 1/tower.attackSpeed && monsters.length > 0) shoot(tower);
+            miniTowers.forEach(mt => {
+                if (sec - mt.lastShot > 1/mt.attackSpeed && monsters.length > 0) shoot(mt);
+            });
 
-            // Обновление пуль
-            for (let i = bullets.length - 1; i >= 0; i--) {
-                if (bullets[i].update(dt)) {
-                    bullets.splice(i, 1);
-                }
-            }
-
-            // Обновление монстров
-            for (let i = monsters.length - 1; i >= 0; i--) {
-                const m = monsters[i];
-                m.update(dt);
-                if (m.hp <= 0) {
-                    gold += m.type === 'boss' ? 200 : m.type === 'tank' ? 30 : 20;
+            for (let i=bullets.length-1; i>=0; i--) if (bullets[i].update(dt)) bullets.splice(i,1);
+            for (let i=monsters.length-1; i>=0; i--) {
+                monsters[i].update(dt);
+                if (monsters[i].hp <= 0) {
+                    gold += monsters[i].type==='boss'?180:monsters[i].type==='tank'?28:18;
                     totalKills++;
-                    // Эффект смерти
-                    for (let j = 0; j < 10; j++) particles.push(new Particle(m.x, m.y));
-                    monsters.splice(i, 1);
+                    spawnParticles(monsters[i].x, monsters[i].y, '#fbbf24', 8);
+                    monsters.splice(i,1);
                 }
             }
+            for (let i=particles.length-1; i>=0; i--) if (!particles[i].update(dt)) particles.splice(i,1);
+            if (active && spawned>=toSpawn && monsters.length===0) endWave();
 
-            // Обновление частиц
-            for (let i = particles.length - 1; i >= 0; i--) {
-                if (!particles[i].update(dt)) particles.splice(i, 1);
-            }
-
-            // Проверка конца волны
-            if (waveActive && monstersSpawned >= monstersInWave && monsters.length === 0) {
-                endWave();
-            }
-
-            // Проверка поражения
-            if (tower.hp <= 0) {
-                tower.hp = 0;
-                gameOver = true;
-                document.getElementById('lose-wave').textContent = wave;
-                document.getElementById('lose-kills').textContent = totalKills;
-                document.getElementById('game-over-screen').style.display = 'flex';
-                saveGame();
-            }
-
-            updateHUD();
+            updateUI();
             draw();
         }
 
         function draw() {
-            ctx.clearRect(0, 0, W, H);
-
+            ctx.clearRect(0,0,W,H);
             // Фон
-            ctx.fillStyle = '#2d5a27';
-            ctx.fillRect(0, 0, W, H);
-
+            ctx.fillStyle = '#2d5a27'; ctx.fillRect(0,0,W,H);
+            // Трава текстура
+            ctx.fillStyle = '#3b7a3b';
+            for (let i=0; i<20; i++) { ctx.fillRect(i*22, 0, 10, H); }
             // Дорога
-            ctx.fillStyle = '#8b7355';
-            ctx.fillRect(0, ROAD_Y_START, W, ROAD_Y_END - ROAD_Y_START);
-            // Разметка
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([20, 20]);
-            ctx.beginPath();
-            ctx.moveTo(0, ROAD_Y_START + (ROAD_Y_END - ROAD_Y_START)/2);
-            ctx.lineTo(W, ROAD_Y_START + (ROAD_Y_END - ROAD_Y_START)/2);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.strokeStyle = '#5c3d2e';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(0, ROAD_Y_START, W, ROAD_Y_END - ROAD_Y_START);
-
+            ctx.fillStyle = '#9e8c7c'; ctx.fillRect(0, ROAD_TOP, W, ROAD_BOTTOM-ROAD_TOP);
+            ctx.strokeStyle = '#c4a882'; ctx.lineWidth = 2;
+            for (let y=ROAD_TOP; y<ROAD_BOTTOM; y+=30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
             // Башня
-            ctx.fillStyle = '#6b8e6b';
-            ctx.fillRect(tower.x, tower.y, 50, 100);
-            ctx.fillStyle = '#4a6741';
-            ctx.fillRect(tower.x - 5, tower.y + 20, 60, 15);
-            ctx.fillRect(tower.x - 5, tower.y + 60, 60, 15);
-            ctx.fillStyle = '#ffd700';
-            ctx.fillRect(tower.x + 10, tower.y + 10, 10, 10);
-            ctx.fillRect(tower.x + 30, tower.y + 10, 10, 10);
-            // Флаг
-            ctx.fillStyle = '#e94560';
-            ctx.beginPath();
-            ctx.moveTo(tower.x + 25, tower.y - 20);
-            ctx.lineTo(tower.x + 50, tower.y - 10);
-            ctx.lineTo(tower.x + 25, tower.y);
-            ctx.fill();
-
-            // HP башни
-            const barW = 50;
-            const barH = 6;
-            const barX = tower.x;
-            const barY = tower.y - 30;
-            ctx.fillStyle = '#333';
-            ctx.fillRect(barX, barY, barW, barH);
-            ctx.fillStyle = '#e94560';
-            ctx.fillRect(barX, barY, barW * (tower.hp / tower.maxHp), barH);
-
+            ctx.fillStyle = '#5c7c5c'; ctx.fillRect(tower.x, tower.y, tower.w, tower.h);
+            ctx.fillStyle = '#3d5c3d'; ctx.fillRect(tower.x-4, tower.y+15, tower.w+8, 12); ctx.fillRect(tower.x-4, tower.y+55, tower.w+8, 12);
+            ctx.fillStyle = '#fbbf24'; ctx.fillRect(tower.x+8, tower.y+8, 8, 8); ctx.fillRect(tower.x+28, tower.y+8, 8, 8);
+            // Мини-башни
+            miniTowers.forEach(mt => {
+                ctx.fillStyle = '#6b8c6b'; ctx.fillRect(mt.x, mt.y, mt.w, mt.h);
+                ctx.fillStyle = '#fbbf24'; ctx.fillRect(mt.x+4, mt.y+4, 6, 6);
+            });
             // Монстры
             monsters.forEach(m => m.draw(ctx));
-
             // Пули
             bullets.forEach(b => b.draw(ctx));
-
             // Частицы
             particles.forEach(p => p.draw(ctx));
         }
 
-        // ==================== СТАРТ ====================
-        loadGame();
-        renderShop();
-        gameLoop.lastTime = performance.now();
-        requestAnimationFrame(gameLoop);
+        load();
+        requestAnimationFrame(loop);
     </script>
 </body>
 </html>
